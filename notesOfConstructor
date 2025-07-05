@@ -1,0 +1,258 @@
+public Class a {
+
+public static void main (String []Args) { 
+/*Final Keyword
+how the final keyword is used in Java, with examples for each case
+A)final Variables – Constant Values
+    A final variable in Java means you can assign a value only once. After that, it cannot be changed.
+  Ex.
+  public class Test {
+      public static void main(String[] args) {
+          final int age = 25;
+          age = 30;  // ❌ Error: cannot assign a value to final variable 'age'
+      }
+  }
+  You can use final with:
+  Primitive types – value cannot change.
+  Objects – reference cannot change, but internal state can.
+  EX.
+  final StringBuilder sb = new StringBuilder("Hello");
+  sb.append(" World"); // ✅ Allowed (object state changed)
+  sb = new StringBuilder("Hi"); // ❌ Not allowed (reference reassignment)
+B)final Methods – Prevent Overriding
+  When a method is marked final, it cannot be overridden in a subclass.
+  class Animal {
+    final void makeSound() {
+        System.out.println("Animal sound");
+    }
+  }
+  Ex
+  class Dog extends Animal {
+    void makeSound() {  // ❌ Error: cannot override final method
+        System.out.println("Bark");
+    }
+  }
+C)final Classes – Prevent Inheritance
+  A final class cannot be subclassed.
+  EX.
+  final class Vehicle {
+      void drive() {
+          System.out.println("Driving");
+      }
+  }
+  class Car extends Vehicle {  // ❌ Error: cannot inherit from final class
+      // Not allowed
+  }
+  This is often used for:
+  Security reasons
+  Performance optimization (JVM can optimize final classes)
+  Utility classes (e.g., java.lang.Math, java.lang.String)
+D)final Parameters – Prevent Reassignment in Method
+  You can also mark method parameters as final to make sure they are not modified inside the method.
+  EX.
+  void printName(final String name) {
+    name = "New Name";  // ❌ Error: cannot assign a value to final parameter
+  }
+
+
+----------------------------------------------------------- Core Constructor Concepts ----------------------------------------------------------------
+
+1) Can a constructor be final, static, or abstract? Why or why not?
+--->NO
+Only public, protected and private keywords are allowed before a constructor name. If you keep any other keyword before a constructor name, it gives compile time error.
+class A
+{
+     final A()
+     {
+         //Constructor can not be final
+     }
+     static A()
+     {
+         //Constructor can not be static
+     }
+     abstract A()
+     {
+        //Constructors can not be abstract
+     }
+}
+Explaination
+final constructor — Not allowed
+    Why? The final keyword means a method cannot be overridden.
+    Constructors are not inherited, so the concept of overriding doesn’t apply to them. Therefore, marking them final is meaningless.
+    ✅ Conclusion: It doesn’t make sense and is disallowed by the language.
+static constructor — Not allowed
+    Why? The static keyword means a method belongs to the class, not an instance.
+    A constructor is meant to initialize an instance, so it must be tied to object creation.
+    Declaring a constructor static contradicts its purpose.
+    ✅ Conclusion: A constructor is inherently non-static, so this is invalid.
+    🔹 Note: Java has static initialization blocks (static {}) for class-level initialization — not the same as a constructor.
+abstract constructor — Not allowed
+    Why? The abstract keyword means a method has no body and must be implemented in a subclass.
+    Constructors must have a body to initialize an object, and cannot be abstract.
+    Also, abstract classes can't be instantiated, so defining a constructor for them is only useful for initializing their subclasses — but still not abstract.
+    ✅ Conclusion: Constructors cannot be abstract since they must be concrete and executable.
+--------------------------------------------
+2)What is the difference between a constructor and a factory method? Which is preferred and when?
+--> What is a Factory Method?
+      A method (usually static) that returns an instance of a class.
+      Allows control over the object creation process (e.g., return a subclass, a cached object, or apply custom logic).
+      Often used when:
+      You don’t want to expose object creation details.
+      You want to return different implementations based on input.
+      You want to enforce conditions on instance creation.
+abstract class Animal {
+    abstract void speak();
+
+    // Factory method
+    public static Animal createAnimal(String type) {
+        if (type.equals("Dog")) {
+            return new Dog();
+        } else if (type.equals("Cat")) {
+            return new Cat();
+        }
+        return null;
+    }
+}
+class Dog extends Animal {
+    void speak() {
+        System.out.println("Woof!");
+    }
+}
+class Cat extends Animal {
+    void speak() {
+        System.out.println("Meow!");
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Animal dog = Animal.createAnimal("Dog");  // using factory method
+        dog.speak();  // Output: Woof!
+        Animal cat = Animal.createAnimal("Cat");  // using factory method
+        cat.speak();  // Output: Meow!
+    }
+}
+| Feature            | **Constructor**                                  | **Factory Method**                                   |
+| ------------------ | ------------------------------------------------ | ---------------------------------------------------- |
+| **Purpose**        | Initializes a new object of a class              | Creates and returns an object, possibly of a subtype |
+| **Name**           | Same as the class name                           | Any custom name (`create()`, `getInstance()`, etc.)  |
+| **Return Type**    | The class itself (implicit)                      | Any object (explicit return type)                    |
+| **Flexibility**    | Limited — always returns a new instance          | High — can return cached objects, subtypes, etc.     |
+| **Inheritance**    | Not inherited, not polymorphic                   | Can return polymorphic objects                       |
+| **Object Control** | No control over instantiation beyond constructor | Can control object lifecycle (e.g., singleton, pool) |
+| **Overhead**       | Slightly lower                                   | Slightly higher, especially with complex logic       |
+
+
+Use a Constructor when:
+  You always want a new instance.
+  The class is simple and does not involve complex creation logic.
+  There's no need for abstraction or caching.
+EX.
+  User user = new User("Alice");
+
+Use a Factory Method when:
+  You want to hide the class instantiation logic.
+  You need flexibility, e.g., return subclasses based on input.
+  You want to implement caching, pools, or singletons.
+  You want to improve naming clarity (e.g., createUserFromJSON()).
+EX.
+  User user = UserFactory.createUserFromJSON(jsonData);
+
+Example: Singleton with Factory Method
+  class Database {
+      private static Database instance;
+      private Database() {}  // private constructor
+      public static Database getInstance() {
+          if (instance == null) {
+              instance = new Database();
+          }
+          return instance;
+      }
+  }
+--------------------------------------------
+3)How does constructor chaining work in Java? Can you give an example of both this() and super() usage?
+--->
+Constructor chaining in Java means calling one constructor from another — either within the same class using this() or from the parent class using super()
+1. this() – Calls another constructor in the same class
+2. super() – Calls a constructor in the parent (super) class
+🧠 Note: Both this() and super() must be the first statement in a constructor, so you can’t use them both at the same time in one constructor.
+ Superclass: Animal
+      class Animal {
+          String name;
+      
+          // Constructor with 1 parameter
+          public Animal(String name) {
+              this.name = name;
+              System.out.println("Animal constructor called with name: " + name);
+          }
+      }
+Subclass: Dog
+    class Dog extends Animal {
+        int age;
+    
+        // Constructor with 2 parameters, calls another constructor using this()
+        public Dog() {
+            this("Buddy", 5);  // Calls the other constructor in the same class
+            System.out.println("Dog default constructor");
+        }
+    
+        // Constructor with parameters, calls super()
+        public Dog(String name, int age) {
+            super(name);  // Calls parent constructor
+            this.age = age;
+            System.out.println("Dog constructor called with name: " + name + " and age: " + age);
+        }
+    }
+  Main Class
+    public class Main {
+        public static void main(String[] args) {
+            Dog d = new Dog();  // Triggers constructor chaining
+        }
+    }
+  Constructor chaining is for reuse	Reduces duplication and centralizes initialization
+--------------------------------------------
+4)What is the role of constructors in immutable classes like String or Integer?
+---> An immutable class is one whose state cannot be changed after it is created.
+  Examples in Java:
+      ✅ String, Integer, LocalDate, BigDecimal, etc.
+  🧭 Role of Constructors in Immutable Classes
+  🔐 Initialize Final Fields
+    Constructors are used only once: to set values at the time of object creation.
+    Once the object is constructed, its fields cannot be changed.
+    Fields are usually declared private final.
+EX.
+    public final class Person {
+        private final String name;
+        private final int age;
+        public Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+        // No setters provided — class is immutable
+        public String getName() { return name; }
+        public int getAge() { return age; }
+    }
+  🧠 Often Paired with Factory Methods
+    Many immutable classes use factory methods (valueOf(), of(), etc.) instead of public constructors for better control (e.g., caching, reusing instances).
+--------------------------------------------
+5)Can we call a constructor from another method in the same class? How is it different from constructor chaining?
+--->🟥 No, you cannot call a constructor directly like a method.
+      Java does not allow calling a constructor from a regular method using this() or super() outside a constructor.
+    🛠️ What You Can Do
+    You can create a new object inside a method, which indirectly calls the constr
+EX.
+    public class Example {
+        int x;
+    
+        // Constructor
+        public Example(int value) {
+            this.x = value;
+            System.out.println("Constructor called with value: " + value);
+        }
+    
+        // Regular method
+        public void createNewExample() {
+            Example e = new Example(100);  // ✅ Creates a new object using the constructor
+        }
+    }
+}*/
+}
