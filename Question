@@ -1,0 +1,6 @@
+1) What is constructor in java?
+Ans.
+  Definition: A constructor in java is special method used to initialize objects of a class.
+              It is automatically called when an object is created and is used to set initial values for the object's attributes.
+
+  
